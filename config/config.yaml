@@ -1,0 +1,17 @@
+app:
+  name: ecommerce
+  jwt_secret: "super-secret-key"
+  token_ttl: "15m"
+
+database:
+  host: "localhost" # PostgreSQL host
+  port: 5432
+  user: "postgres"
+  password: "password"
+  name: "ecommerce"
+  sslmode: "disable"
+
+redis:
+  addr: "127.0.0.1:6379"
+  password: ""
+  db: 0

@@ -1,0 +1,53 @@
+{{define "login.html"}}
+{{template "header" .}}
+
+<div class="main-wrapper">
+  <div class="page-wrapper full-page">
+    <div class="page-content d-flex align-items-center justify-content-center">
+      <div class="row w-100 mx-0 auth-page">
+        <div class="col-md-10 col-lg-8 col-xl-6 mx-auto">
+          <div class="card">
+            <div class="row">
+              <div class="col-md-4 pe-md-0">
+                <div class="auth-side-wrapper"></div>
+              </div>
+              <div class="col-md-8 ps-md-0">
+                <div class="auth-form-wrapper px-4 py-5">
+                  <a href="#" class="nobleui-logo d-block mb-2">Go <span>Commerce</span></a>
+                  <h5 class="text-secondary fw-normal mb-4">Welcome back! Log in to your account.</h5>
+
+                  <!-- Error Message -->
+                  {{if .error}}
+                  <div class="alert alert-danger">{{.error}}</div>
+                  {{end}}
+
+                  <form method="POST" class="forms-sample">
+                    <div class="mb-3">
+                      <label for="userEmail" class="form-label">Email address</label>
+                      <input type="email" value="admin@example.com" name="email" class="form-control" id="userEmail" placeholder="Email" value="{{.email}}">
+                    </div>
+                    <div class="mb-3">
+                      <label for="userPassword" class="form-label">Password</label>
+                      <input type="password" value="password123" name="password" class="form-control" id="userPassword" placeholder="Password">
+                    </div>
+                    <div class="form-check mb-3">
+                     <input type="checkbox" class="form-check-input" id="authCheck" name="remember">
+                     <label class="form-check-label" for="authCheck">Remember me</label>
+                    </div>
+                    <div>
+                      <button type="submit" class="btn btn-primary me-2 mb-2 mb-md-0 text-white">Login Now</button>
+                    </div>
+                    <a href="/admin/forget-password" class="d-block mt-4 text-primary">Forget your password? Reset now</a>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{template "footer" .}}
+{{end}}
