@@ -1,0 +1,66 @@
+{{define "sidebar"}}
+ <!-- sidebar -->
+		<nav class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="sidebar-brand">
+                GoGo<span> Job </span>
+                </a>
+                <div class="sidebar-toggler">
+                <span></span>
+                <span></span>
+                <span></span>
+                </div>
+            </div>
+            <div class="sidebar-body">
+                <ul class="nav" id="sidebarNav">
+                <li class="nav-item">
+                    <a href="/admin/dashboard" class="nav-link">
+                    <i class="link-icon" data-feather="box"></i>
+                    <span class="link-title">Dashboard</span>
+                    </a>
+                </li>
+                <li class="nav-item nav-category">web apps</li>
+
+                <li class="nav-item">
+                    <a href="/admin/job-type-list" class="nav-link">
+                    <i class="link-icon" data-feather="message-square"></i>
+                    <span class="link-title">Job Type</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#categories" role="button" aria-expanded="false" aria-controls="categories">
+                    <i class="link-icon" data-feather="mail"></i>
+                    <span class="link-title">Categories</span>
+                    <i class="link-arrow" data-feather="chevron-down"></i>
+                    </a>
+                    <div class="collapse" data-bs-parent="#sidebarNav" id="categories">
+                    <ul class="nav sub-menu">
+                        <li class="nav-item">
+                        <a href="/admin/category-list" class="nav-link">Category</a>
+                        </li>
+                        <li class="nav-item">
+                        <a href="/admin/subcategory-list" class="nav-link">Sub Category</a>
+                        </li>
+                    </ul>
+                    </div>
+                </li>
+                <!-- <li class="nav-item">
+                    <a class="nav-link" data-bs-toggle="collapse" href="#emails" role="button" aria-expanded="false" aria-controls="emails">
+                    <i class="link-icon" data-feather="mail"></i>
+                    <span class="link-title">Job Post</span>
+                    <i class="link-arrow" data-feather="chevron-down"></i>
+                    </a>
+                    <div class="collapse" data-bs-parent="#sidebarNav" id="emails">
+                    <ul class="nav sub-menu">
+                        <li class="nav-item">
+                        <a href="#" class="nav-link">Inbox</a>
+                        </li>
+                    </ul>
+                    </div>
+                </li> -->
+
+                </ul>
+            </div>
+        </nav>
+            <!-- end sidebar -->
+{{end}}

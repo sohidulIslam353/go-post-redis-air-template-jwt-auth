@@ -31,7 +31,9 @@ ecommerce/
 │   ├── routes/     # API routes
 │   └── utils/      # Helpers (pagination, common utils)
 │
+│── templates/      # HTML templates
 │── migrations/     # Database migrations
+│── static/         # Static files
 │── tmp/            # Compiled files (ignored in git)
 │── .air.toml       # Air configuration for live reload
 │── go.mod / go.sum # Go modules

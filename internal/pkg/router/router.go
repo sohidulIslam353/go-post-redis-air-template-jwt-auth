@@ -5,6 +5,7 @@ import (
 	"gin-app/internal/utils"
 	"html/template"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -15,6 +16,10 @@ func SetupRouter() *gin.Engine {
 
 	r.SetFuncMap(template.FuncMap{
 		"asset": utils.Asset, // utils.Asset কে "asset" নামে template এ expose করলাম
+		"add":   func(a, b int) int { return a + b },
+		"formatDate": func(t time.Time) string {
+			return t.Format("02 Jan 2006")
+		},
 	})
 
 	// load html
@@ -25,7 +30,7 @@ func SetupRouter() *gin.Engine {
 	r.GET("/", func(c *gin.Context) {
 		c.String(200, "সাবধান বিপদের দিকে এগোবেন না।")
 	})
-	// এখানে Custom 404 Handler সেট করা হচ্ছে
+	// 404 page
 	r.NoRoute(func(c *gin.Context) {
 		c.HTML(http.StatusNotFound, "404.html", gin.H{
 			"title": "Page Not Found",

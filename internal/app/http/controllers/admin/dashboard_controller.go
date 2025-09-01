@@ -14,9 +14,14 @@ func AdminDashboard(c *gin.Context) {
 		c.Redirect(303, "/admin/login")
 		return
 	}
-	c.JSON(200, gin.H{"message": "Admin Dashboard is working!", "admin": admin})
+	c.HTML(http.StatusOK, "dashboard.html", gin.H{
+		"admin": admin,
+		"title": "Dashboard",
+	})
+
 }
 
+// Admin logout
 func AdminLogout(c *gin.Context) {
 	accessToken, _ := c.Cookie("admin_access")
 	refreshToken, _ := c.Cookie("admin_refresh")

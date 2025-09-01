@@ -20,6 +20,7 @@ type Config struct {
 		User     string
 		Password string
 		Name     string
+		SSLMode  string
 	} `mapstructure:"database"`
 
 	Redis struct {
@@ -48,8 +49,8 @@ func LoadConfig() {
 	}
 
 	// Checking if JWT_SECRET is set
-	// jwtKey := []byte(viper.GetString("JWT_SECRET.secret"))
-	// log.Println("JWT Key:", string(jwtKey))
+	// jwtKey := []byte(viper.GetString("app.jwt_secret"))
+	// log.Println("✅ JWT Key:", string(jwtKey))
 
 	log.Println("✅ Config loaded successfully")
 }

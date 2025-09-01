@@ -1,0 +1,77 @@
+{{define "job_type_edit.html"}}
+{{template "header" .}}
+<div class="main-wrapper">
+    {{ template "sidebar" .}}
+    <div class="page-wrapper">
+        {{ template "navbar" .}}
+        <div class="page-content container-fluid py-3">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center flex-wrap p-3 mb-4 bg-white rounded shadow-sm">
+                <h4 class="h5 fw-semibold mb-0">Update Job Type</h4>
+                <a href="/admin/job-type-list" class="btn btn-primary d-flex align-items-center">
+                    <i data-feather="list" class="me-2"></i> All List
+                </a>
+            </div>
+
+            <!-- Alerts -->
+            {{if .success}}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <strong>{{ .success }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
+            {{if .error}}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <strong>{{ .error }}</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {{end}}
+
+            <!-- Form Card -->
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card shadow-sm rounded">
+                        <div class="card-body">
+                            <form method="POST" action="/admin/job-type-update/{{ .data.ID }}">
+                                <div class="row g-3">
+                                    <!-- Type Name -->
+                                    <div class="col-md-6">
+                                        <label class="form-label">Type Name <span class="text-danger">*</span></label>
+                                        <input type="text" name="name" value="{{ .data.Name }}" class="form-control" placeholder="Enter job type name" required>
+                                        {{ if .errors }}
+                                            {{ with $err := index .errors "Name" }}
+                                                <div class="text-danger small mt-1">{{ $err }}</div>
+                                            {{ end }}
+                                        {{ end }}
+                                    </div>
+
+                                    <!-- Status -->
+                                    <div class="col-md-6">
+                                        <label class="form-label">Status</label>
+                                        <select class="form-select" name="status">
+                                            <option value="1" {{ if eq .data.Status 1 }}selected{{ end }}>Active</option>
+                                            <option value="0" {{ if eq .data.Status 0 }}selected{{ end }}>Inactive</option>
+                                        </select>
+                                        {{ if .errors }}
+                                            {{ with $err := index .errors "Status" }}
+                                                <div class="text-danger small mt-1">{{ $err }}</div>
+                                            {{ end }}
+                                        {{ end }}
+                                    </div>
+                                </div>
+
+                                <!-- Buttons -->
+                                <div class="mt-4 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">Update</button>
+                                    <a href="/admin/job-type-list" class="btn btn-outline-secondary">Go Back</a>
+                                </div>
+                            </form> 
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{template "footer" .}}
+{{end}}

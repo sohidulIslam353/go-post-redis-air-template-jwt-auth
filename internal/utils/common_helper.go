@@ -1,6 +1,9 @@
 package utils
 
 import (
+	"encoding/json"
+	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"unicode"
@@ -36,4 +39,11 @@ func MakeSlug(s string) string {
 
 func Asset(path string) string {
 	return "/static/" + path
+}
+
+// like die and dump dd like php
+func DD(v interface{}) {
+	b, _ := json.MarshalIndent(v, "", "  ")
+	fmt.Println(string(b))
+	os.Exit(0)
 }

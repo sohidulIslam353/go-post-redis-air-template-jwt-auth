@@ -13,19 +13,32 @@ import (
 
 var DB *bun.DB
 
-// InitDB initializes Bun with PostgreSQL / CockroachDB
-func InitDB() {
-	// Load app config from viper or config.yaml
-	LoadConfig()
+// GetDSN builds a PostgreSQL DSN string from config
+func GetDSN() string {
+	if AppConfig.Database.Host == "" {
+		LoadConfig()
+	}
 
 	dbConf := AppConfig.Database
-	dsn := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable",
+	sslmode := dbConf.SSLMode
+	if sslmode == "" {
+		sslmode = "disable" // default fallback
+	}
+
+	return fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
 		dbConf.User,
 		dbConf.Password,
 		dbConf.Host,
 		dbConf.Port,
 		dbConf.Name,
+		sslmode,
 	)
+}
+
+// InitDB initializes Bun with PostgreSQL
+func InitDB() {
+	dsn := GetDSN()
 
 	// Open underlying *sql.DB
 	sqlDB, err := sql.Open("postgres", dsn)

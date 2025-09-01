@@ -1,11 +1,17 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
+	"gin-app/config"
 	"gin-app/internal/utils"
+	"log"
 	"os"
 	"strings"
 	"text/template"
+	"time"
+
+	"github.com/pressly/goose"
 )
 
 // This template is for creating a basic controller in a Gin web application
@@ -23,7 +29,6 @@ const modelTemplate = `package models
 
 	import (
 		"time"
-
 		"github.com/uptrace/bun"
 	)
 
@@ -59,29 +64,111 @@ func {{.MiddlewareName}}() gin.HandlerFunc {
 }
 `
 
+const migrationTemplate = `
+	-- +goose Up
+	-- +goose StatementBegin
+	CREATE TABLE {{.TableName}} (
+		id BIGSERIAL PRIMARY KEY,
+		category_id BIGINT NOT NULL,
+		name VARCHAR(255) NOT NULL,
+		slug VARCHAR(255) NOT NULL,
+		status SMALLINT NOT NULL DEFAULT 1,
+		created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		-- CONSTRAINT fk_category FOREIGN KEY (category_id) REFERENCES categories (id) ON DELETE CASCADE
+	);
+	-- +goose StatementEnd
+
+	-- +goose StatementBegin
+	-- Index on name for faster search
+	-- CREATE INDEX idx_{{.TableName}}_name ON {{.TableName}}(name);
+	-- +goose StatementEnd
+
+	-- +goose StatementBegin
+	-- Unique index on slug to avoid duplicates
+	-- CREATE UNIQUE INDEX idx_{{.TableName}}_slug ON {{.TableName}}(slug);
+	-- +goose StatementEnd
+
+	-- +goose StatementBegin
+	-- Combined index on category_id + name (optional, useful for filtering by category)
+	-- CREATE INDEX idx_{{.TableName}}_category_name ON {{.TableName}}(category_id, name);
+	-- +goose StatementEnd
+
+	-- +goose Down
+
+	-- +goose StatementBegin
+	DROP TABLE IF EXISTS {{.TableName}};
+	-- +goose StatementEnd
+`
+
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: go run cmd/commands/make.go controller ControllerName")
-		fmt.Println("  go run cmd/commands/make.go model ModelName")
-		fmt.Println("  go run cmd/commands/make.go middleware MiddlewareName")
+	if len(os.Args) < 2 {
+		fmt.Println("Usage:")
+		fmt.Println("  go run cmd/commands/make.go make:controller ControllerName")
+		fmt.Println("  go run cmd/commands/make.go make:model ModelName")
+		fmt.Println("  go run cmd/commands/make.go make:middleware MiddlewareName")
+		fmt.Println("  go run cmd/commands/make.go make:migration MigrationName")
+		fmt.Println("  go run cmd/commands/make.go migrate:up")
+		fmt.Println("  go run cmd/commands/make.go migrate:down")
+		fmt.Println("  go run cmd/commands/make.go migrate:status")
 		return
 	}
 
 	command := os.Args[1]
-	name := os.Args[2]
+
+	// Only load name if the command requires it
+	var name string
+	if len(os.Args) >= 3 {
+		name = os.Args[2]
+	}
+
+	// for migration task
+	config.LoadConfig()
+	dsn := config.GetDSN() // ✅ use same DSN everywhere
+	dir := "./migrations"
+
+	db, err := sql.Open("postgres", dsn)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	// end
 
 	switch command {
-	case "controller":
+	case "make:controller":
+		if name == "" {
+			log.Fatal("❌ Please provide ControllerName")
+		}
 		createController(name)
-	case "model":
+	case "make:model":
+		if name == "" {
+			log.Fatal("❌ Please provide ModelName")
+		}
 		createModel(name)
-	case "middleware":
+	case "make:middleware":
+		if name == "" {
+			log.Fatal("❌ Please provide MiddlewareName")
+		}
 		createMiddleware(name)
+	case "make:migration":
+		if name == "" {
+			log.Fatal("❌ Please provide MigrationName")
+		}
+		createMigration(name)
+	case "migrate:up":
+		_ = goose.Up(db, dir)
+		fmt.Println("✅ Migration completed!")
+	case "migrate:down":
+		_ = goose.Down(db, dir)
+		fmt.Println("✅ Migration rolled back!")
+	case "migrate:status":
+		_ = goose.Status(db, dir)
 	default:
-		fmt.Println("Unknown command:", command)
+		fmt.Println("❌ Unknown command:", command)
 	}
 }
 
+// Controller Create
 func createController(name string) {
 	controllerName := "Index" // will be method name
 	fileName := strings.ToLower(name) + ".go"
@@ -109,6 +196,7 @@ func createController(name string) {
 	fmt.Println("✅ Controller created at:", filePath)
 }
 
+// Model Create
 func createModel(name string) {
 	modelName := utils.ToTitleCase(name)
 	tableName := strings.ToLower(name)
@@ -138,6 +226,7 @@ func createModel(name string) {
 	fmt.Println("✅ Model created at:", filePath)
 }
 
+// Middleware Creat
 func createMiddleware(name string) {
 	middlewareName := utils.ToTitleCase(name)
 	fileName := strings.ToLower(name) + ".go"
@@ -164,3 +253,34 @@ func createMiddleware(name string) {
 
 	fmt.Println("✅ Middleware created at:", filePath)
 }
+
+// Migration file generated
+func createMigration(name string) {
+	migrationName := strings.ToLower(name)
+	fileName := time.Now().Format("20060102150405") + "_create_" + strings.ToLower(name) + "_table.sql"
+	filePath := "migrations/" + fileName
+
+	_ = os.MkdirAll("migrations", os.ModePerm)
+
+	if _, err := os.Stat(filePath); err == nil {
+		fmt.Println("⚠️ Migration already exists:", filePath)
+		return
+	}
+
+	f, err := os.Create(filePath)
+	if err != nil {
+		fmt.Println("❌ Error creating migration:", err)
+		return
+	}
+	defer f.Close()
+
+	tmpl, _ := template.New("migration").Parse(migrationTemplate)
+	tmpl.Execute(f, map[string]string{
+		"MigrationName": migrationName,
+		"TableName":     strings.ToLower(name),
+	})
+
+	fmt.Println("✅ Migration created at:", filePath)
+}
+
+// Migration run command

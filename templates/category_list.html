@@ -1,0 +1,182 @@
+{{define "category_list.html"}}
+    {{template "header" .}}
+    <div class="main-wrapper">
+        {{ template "sidebar" .}}
+        <div class="page-wrapper">
+            {{ template "navbar" .}}
+            <div class="page-content">
+                <div class="d-flex justify-content-between align-items-center flex-wrap p-3 mb-4 bg-white rounded shadow-sm">
+                    <div>
+                        <h4 class="h5 fw-semibold mb-0">Category List</h4>
+                    </div>
+                    <div>
+                        <a href="/admin/category-create" class="btn btn-primary d-flex align-items-center">
+                            <i data-feather="plus" class="me-2"></i> Add New
+                        </a>
+                    </div>
+                </div>
+
+
+                {{if .success}}
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <strong>{{ .success }}</strong>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {{end}}
+                
+                    <div class="card shadow-sm rounded mb-4">
+                        <div class="card-body">
+                            <!-- Filter Form -->
+                            <form class="row g-3 mb-4" method="GET" action="">
+                                <div class="col-md-3">
+                                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by name or slug">
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="status" class="form-select form-select-sm">
+                                        <option value="">-- All Status --</option>
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <input type="date" name="created_at" class="form-control form-control-sm">
+                                </div>
+                                <div class="col-md-3 d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1">Filter</button>
+                                    <a href="/admin/category-list" class="btn btn-outline-secondary btn-sm flex-grow-1">Reset</a>
+                                </div>
+                            </form>
+
+                            <!-- Table -->
+                            <div class="table-responsive">
+                                <table class="table table-hover table-sm align-middle mb-0">
+                                    <thead class="table-light text-black text-uppercase small">
+                                        <tr>
+                                            <th class="py-1 px-2 text-black">SL</th>
+                                            <th class="py-1 px-2 text-black">Name</th>
+                                            <th class="py-1 px-2 text-black">Slug</th>
+                                            <th class="py-1 px-2 text-black">Created At</th>
+                                            <th class="py-1 px-2 text-black">Status</th>
+                                            <th class="py-1 px-2 text-black text-center">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {{if .data}}
+                                        {{range $i, $category := .data}}
+                                        <tr>
+                                            <td class="py-1 px-2">{{add $i 1}}</td>
+                                            <td class="py-1 px-2">{{$category.Name}}</td>
+                                            <td class="py-1 px-2">{{$category.Slug}}</td>
+                                            <td class="py-1 px-2">{{formatDate $category.CreatedAt}}</td>
+                                            <td class="py-1 px-2">
+                                                <div class="form-check form-switch">
+                                                    <input type="checkbox"
+                                                        class="form-check-input category-status-toggle"
+                                                        data-id="{{$category.ID}}"
+                                                        {{ if eq $category.Status 1 }}checked{{ end }}>
+                                                </div>
+                                            </td>
+                                            <td class="py-1 px-2 text-center">
+                                                <div class="d-flex justify-content-center gap-1">
+                                                    <a href="/admin/category-edit/{{$category.ID}}" class="btn btn-sm btn-outline-primary p-1 px-2 d-flex align-items-center">
+                                                        <i data-feather="edit" class="me-1" style="width:12px;height:12px;"></i> Edit
+                                                    </a>
+                                                    <a href="#" class="delete-category btn btn-sm btn-outline-danger p-1 px-2 d-flex align-items-center"
+                                                        data-id="{{$category.ID}}">
+                                                        <i data-feather="trash" class="me-1" style="width:12px;height:12px;"></i> Delete
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {{end}}
+                                        {{else}}
+                                        <tr>
+                                            <td colspan="6" class="text-center py-2 text-muted">No job types found</td>
+                                        </tr>
+                                        {{end}}
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Pagination -->
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="text-muted small">
+                                    Showing {{len .data}} of {{.total}} job types
+                                </div>
+                                {{if .nextCursor}}
+                                <a href="?last_id={{.nextCursor}}&page_size={{.limit}}&search={{.filters.search}}&status={{.filters.status}}&created_at={{.filters.created_at}}"
+                                class="btn btn-primary btn-sm">Load More</a>
+                                {{end}}
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    {{template "footer" .}}
+
+    {{if eq .PageName "category_list"}}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // status toggle
+        document.querySelectorAll(".category-status-toggle").forEach(function (el) {
+            el.addEventListener("change", function () {
+                let categoryId = this.dataset.id;
+                let newStatus = this.checked ? 1 : 0;
+
+                fetch(`/admin/category-status/${categoryId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ status: newStatus }),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Successfully Updated!',
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true,
+                    });
+                });
+            });
+        });
+
+        // delete category
+        document.querySelectorAll(".delete-category").forEach(el => {
+            el.addEventListener("click", function(e) {
+                e.preventDefault();
+                const categoryId = this.dataset.id;
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "This action cannot be undone!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if(result.isConfirmed){
+                        fetch(`/admin/category-delete/${categoryId}`, {
+                            method: 'DELETE',
+                            headers: { "Content-Type": "application/json" }
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            Swal.fire('Deleted!', data.message, 'success').then(()=>{
+                                location.reload();
+                            });
+                        });
+                    }
+                });
+            });
+        });
+    });
+    </script>
+    {{ end }}
+
+{{end}}
