@@ -1,4 +1,4 @@
-# 🛒 Ecommerce API (Gin + PostgreSQL + Bun)
+# 🛒 JOBPORTAL APPLICATION (Gin + PostgreSQL + Bun + AIR + JWT etc)
 
 A clean architecture boilerplate for building large-scale applications using **Gin**, **PostgreSQL**, and **Bun ORM**.  
 Supports modular structure with `internal/` folder (DTO, Models, Routes, Utils, etc).
